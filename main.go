@@ -37,8 +37,6 @@ var (
 	versionString = "0.0.0-git"
 )
 
-var sketch = paths.New("./C3SerialPassthrough.ino.bin")
-
 type portentaC33Plugin struct {
 	esptoolBin *paths.Path
 	dfuUtilBin *paths.Path
@@ -167,6 +165,8 @@ func (d *portentaC33Plugin) reboot(portAddress *string, feedback *helper.PluginF
 
 func (d *portentaC33Plugin) uploadCommandsSketch(portAddress string, feedback *helper.PluginFeedback) error {
 	slog.Info("upload_command_sketch")
+
+	sketch := paths.New("./sketches/C3SerialPassthrough/build/C3SerialPassthrough.ino.bin")
 
 	slog.Info("uploading command sketch with dfu-util")
 	cmd, err := executils.NewProcess([]string{}, d.dfuUtilBin.String(), "--device", "0x2341:0x0068,:0x0368", "-D", sketch.String(), "-a0", "-Q")
