@@ -17,8 +17,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/arduino/arduino-cli/executils"
@@ -26,6 +28,7 @@ import (
 	"github.com/arduino/go-paths-helper"
 	"github.com/arduino/portenta-c33-fwuploader-plugin/serial"
 	semver "go.bug.st/relaxed-semver"
+	serialx "go.bug.st/serial"
 	"golang.org/x/exp/slog"
 )
 
@@ -127,13 +130,33 @@ func (d *portentaC33Plugin) GetFirmwareVersion(portAddress, fqbn string, feedbac
 		fmt.Fprintln(feedback.Err(), "Port address not specified")
 		return nil, fmt.Errorf("invalid port address")
 	}
-	fmt.Fprintf(feedback.Out(), "Getting firmware version from %s...\n", portAddress)
 
 	// Fake query
-	time.Sleep(5 * time.Second)
+	sketch := paths.New("./CheckFirmwareVersion.ino.bin")
+	if err := d.uploadSketch(portAddress, feedback, sketch); err != nil {
+		return nil, err
+	}
 
-	fmt.Fprintf(feedback.Out(), "Done!\n")
-	return semver.ParseRelaxed("1.0.0"), nil
+	allSerialPorts, err := serial.AllPorts()
+	if err != nil {
+		return nil, err
+	}
+	newPort, changed, err := allSerialPorts.NewPort()
+	if err != nil {
+		return nil, err
+	}
+	if changed {
+		portAddress = newPort
+	}
+
+	port, err := serial.Open(portAddress)
+	if err != nil {
+		return nil, err
+	}
+	defer port.Close()
+
+	fmt.Fprintf(feedback.Out(), "Getting firmware version from %s...\n", portAddress)
+	return getFirmwareVersion(port)
 }
 
 func (d *portentaC33Plugin) reboot(portAddress *string, feedback *helper.PluginFeedback) error {
@@ -143,8 +166,9 @@ func (d *portentaC33Plugin) reboot(portAddress *string, feedback *helper.PluginF
 		return err
 	}
 
-	if err := d.uploadCommandsSketch(*portAddress, feedback); err != nil {
-		return fmt.Errorf("upload commands sketch: %v", err)
+	sketch := paths.New("./sketches/C3SerialPassthrough/build/C3SerialPassthrough.ino.bin")
+	if err := d.uploadSketch(*portAddress, feedback, sketch); err != nil {
+		return fmt.Errorf("upload sketch: %v", err)
 	}
 
 	fmt.Fprintf(feedback.Out(), "\nWaiting to flash the binary...\n")
@@ -163,12 +187,10 @@ func (d *portentaC33Plugin) reboot(portAddress *string, feedback *helper.PluginF
 	return nil
 }
 
-func (d *portentaC33Plugin) uploadCommandsSketch(portAddress string, feedback *helper.PluginFeedback) error {
-	slog.Info("upload_command_sketch")
+func (d *portentaC33Plugin) uploadSketch(portAddress string, feedback *helper.PluginFeedback, sketch *paths.Path) error {
+	slog.Info("upload_sketch")
 
-	sketch := paths.New("./sketches/C3SerialPassthrough/build/C3SerialPassthrough.ino.bin")
-
-	slog.Info("uploading command sketch with dfu-util")
+	slog.Info("uploading sketch with dfu-util")
 	cmd, err := executils.NewProcess([]string{}, d.dfuUtilBin.String(), "--device", "0x2341:0x0068,:0x0368", "-D", sketch.String(), "-a0", "-Q")
 	if err != nil {
 		return err
@@ -181,4 +203,23 @@ func (d *portentaC33Plugin) uploadCommandsSketch(portAddress string, feedback *h
 
 	time.Sleep(1 * time.Second)
 	return nil
+}
+
+func getFirmwareVersion(port serialx.Port) (*semver.RelaxedVersion, error) {
+	if _, err := port.Write([]byte(string(serial.VersionCommand))); err != nil {
+		return nil, fmt.Errorf("write to serial port: %v", err)
+	}
+
+	var out string
+	scanner := bufio.NewScanner(port)
+	for scanner.Scan() {
+		out = out + scanner.Text() + "\n"
+		if strings.Contains(out, "Check result") {
+			break
+		}
+	}
+
+	version := strings.Split(strings.Split(out, "\n")[2], ":")[1]
+
+	return semver.ParseRelaxed(version), nil
 }
