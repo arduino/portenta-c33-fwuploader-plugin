@@ -41,8 +41,9 @@ var (
 )
 
 type portentaC33Plugin struct {
-	esptoolBin *paths.Path
-	dfuUtilBin *paths.Path
+	esptoolBin          *paths.Path
+	dfuUtilBin          *paths.Path
+	syntiantUploaderBin *paths.Path
 }
 
 func main() {
@@ -54,10 +55,15 @@ func main() {
 	if err != nil {
 		log.Fatalln("Couldn't find dfu-util@0.11.0-arduino5 binary")
 	}
+	syntiantUploaderPath, err := helper.FindToolPath("syntiant-uploader", semver.MustParse("0.0.0"))
+	if err != nil {
+		log.Fatalln("Couldn't find syntiant-uploader@0.11.0-arduino5 binary")
+	}
 
 	helper.RunPlugin(&portentaC33Plugin{
-		esptoolBin: esptoolPath.Join(("esptool")),
-		dfuUtilBin: dfuUtilPath.Join("dfu-util"),
+		esptoolBin:          esptoolPath.Join(("esptool")),
+		dfuUtilBin:          dfuUtilPath.Join("dfu-util"),
+		syntiantUploaderBin: syntiantUploaderPath.Join("syntiant-uploader"),
 	})
 }
 
@@ -118,8 +124,20 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 	}
 	fmt.Fprintf(feedback.Out(), "Uploading certificates to %s...\n", portAddress)
 
-	// Fake upload
-	time.Sleep(5 * time.Second)
+	sketch := paths.New("./CertificateUploaderYModem.ino.bin")
+	if err := d.reboot(&portAddress, feedback, sketch); err != nil {
+		return err
+	}
+
+	cmd, err := executils.NewProcess([]string{}, d.syntiantUploaderBin.String(), "send", "-m", "\"Y\"", "-w", "\"Y\"", "-p", portAddress, certificatePath.String())
+	if err != nil {
+		return err
+	}
+	cmd.RedirectStderrTo(feedback.Err())
+	cmd.RedirectStdoutTo(feedback.Out())
+	if err := cmd.Run(); err != nil {
+		return err
+	}
 
 	fmt.Fprintf(feedback.Out(), "Upload completed!\n")
 	return nil
