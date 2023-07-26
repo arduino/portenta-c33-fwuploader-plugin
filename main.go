@@ -91,7 +91,8 @@ func (d *portentaC33Plugin) UploadFirmware(portAddress, fqbn string, firmwarePat
 		return fmt.Errorf("invalid fqbn")
 	}
 
-	if err := d.reboot(&portAddress, feedback); err != nil {
+	sketch := paths.New("./sketches/C3SerialPassthrough/build/C3SerialPassthrough.ino.bin")
+	if err := d.reboot(&portAddress, feedback, sketch); err != nil {
 		return err
 	}
 
@@ -133,20 +134,8 @@ func (d *portentaC33Plugin) GetFirmwareVersion(portAddress, fqbn string, feedbac
 
 	// Fake query
 	sketch := paths.New("./CheckFirmwareVersion.ino.bin")
-	if err := d.uploadSketch(portAddress, feedback, sketch); err != nil {
+	if err := d.reboot(&portAddress, feedback, sketch); err != nil {
 		return nil, err
-	}
-
-	allSerialPorts, err := serial.AllPorts()
-	if err != nil {
-		return nil, err
-	}
-	newPort, changed, err := allSerialPorts.NewPort()
-	if err != nil {
-		return nil, err
-	}
-	if changed {
-		portAddress = newPort
 	}
 
 	port, err := serial.Open(portAddress)
@@ -159,14 +148,13 @@ func (d *portentaC33Plugin) GetFirmwareVersion(portAddress, fqbn string, feedbac
 	return getFirmwareVersion(port)
 }
 
-func (d *portentaC33Plugin) reboot(portAddress *string, feedback *helper.PluginFeedback) error {
+func (d *portentaC33Plugin) reboot(portAddress *string, feedback *helper.PluginFeedback, sketch *paths.Path) error {
 	// Will be used later to check if the OS changed the serial port.
 	allSerialPorts, err := serial.AllPorts()
 	if err != nil {
 		return err
 	}
 
-	sketch := paths.New("./sketches/C3SerialPassthrough/build/C3SerialPassthrough.ino.bin")
 	if err := d.uploadSketch(*portAddress, feedback, sketch); err != nil {
 		return fmt.Errorf("upload sketch: %v", err)
 	}
