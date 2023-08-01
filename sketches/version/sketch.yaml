@@ -1,0 +1,6 @@
+profiles:
+  portenta_c33:
+    fqbn: arduino:renesas_portenta:portenta_c33
+    platforms:
+      - platform: arduino:renesas_portenta (1.0.2)
+
