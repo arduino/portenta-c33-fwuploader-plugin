@@ -1,4 +1,4 @@
-// fwuploader-plugin-helper
+// portenta-c33-fwuploader-plugin
 // Copyright (c) 2023 Arduino LLC.  All right reserved.
 //
 // This program is free software: you can redistribute it and/or modify
