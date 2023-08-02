@@ -141,8 +141,6 @@ func ModemSend(c io.ReadWriter, data []byte, filename string) error {
 			send.Write([]byte{0x0})
 		}
 
-		fmt.Printf("Sending %d bytes\n", len(data))
-
 		sendBlock(c, 0, send.Bytes())
 
 		// Wait for ACK
@@ -151,8 +149,7 @@ func ModemSend(c io.ReadWriter, data []byte, filename string) error {
 		}
 
 		if oBuffer[0] != ACK {
-			fmt.Printf("oBuffer[0] : %x\n", oBuffer[0])
-			return errors.New("Failed to send header block")
+			return fmt.Errorf("failed to send header block: %x", oBuffer[0])
 		}
 	}
 
@@ -167,7 +164,6 @@ func ModemSend(c io.ReadWriter, data []byte, filename string) error {
 		if len(data) > int(int(blocks)*int(LONG_PACKET_PAYLOAD_LEN)) {
 			blocks++
 		}
-		fmt.Printf("blocks : %d\n", blocks)
 
 		failed := 0
 		var currentBlock uint16 = 0
