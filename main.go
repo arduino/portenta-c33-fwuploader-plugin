@@ -19,6 +19,7 @@ package main
 import (
 	"bufio"
 	_ "embed"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -123,6 +124,12 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 	if certificatePath == nil || certificatePath.IsDir() || !certificatePath.Exist() {
 		return fmt.Errorf("invalid certificate path")
 	}
+	if len(certificatePath.Base()) >= 255 {
+		return fmt.Errorf("the certificate name: %v must be less than 256 charaters", certificatePath.Base())
+	}
+	if certificatePath.Base() == "cacert.pem" {
+		return fmt.Errorf("`cacert` name is reserved for the default certificate, please provide a different file name")
+	}
 
 	fmt.Fprintf(feedback.Out(), "Uploading certificates to %s...\n", portAddress)
 
@@ -141,7 +148,7 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 	if err != nil {
 		return err
 	}
-	if err := connection.SetReadTimeout(5 * time.Second); err != nil {
+	if err := connection.SetReadTimeout(100 * time.Second); err != nil {
 		return err
 	}
 
@@ -152,10 +159,9 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 		return err
 	}
 
-	wait := "Y"
-	// Wait for message
-	if len(wait) > 0 {
-		var result string
+	// reads for possible errors coming from the sketch
+	{
+		var resultSerialOutput string
 		buffer := make([]byte, 64)
 		for {
 			n, err := connection.Read(buffer)
@@ -165,10 +171,20 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 			if n == 0 {
 				break
 			}
-			result += string(buffer[0:n])
-			if strings.Contains(result, wait) {
+			resultSerialOutput += string(buffer[0:n])
+			if strings.Contains(resultSerialOutput, "YSTART") {
 				break
 			}
+		}
+
+		if strings.Contains(resultSerialOutput, "ERR:") {
+			errs := strings.Split(resultSerialOutput, "\r\n")
+			result := fmt.Sprintf("%v", errs[1][4:])
+			// the ignore the last message as it's not an error
+			for _, e := range errs[1 : len(errs)-1] {
+				result += ", " + e[4:]
+			}
+			return errors.New(result)
 		}
 	}
 
@@ -177,9 +193,10 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 		return err
 	}
 
+	fmt.Fprintf(feedback.Out(), "Please wait a few seconds...\n")
+
 	time.Sleep(1 * time.Second)
 
-	// Send file
 	if err := ymodem.ModemSend(connection, data, certificatePath.Base()); err != nil {
 		return err
 	}
