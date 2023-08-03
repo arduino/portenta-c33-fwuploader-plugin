@@ -22,9 +22,7 @@
 
 BlockDevice* root = BlockDevice::get_default_instance();
 MBRBlockDevice sys_bd(root, 1);
-MBRBlockDevice user_bd(root, 2);
 FATFileSystem sys_fs("sys");
-FileSystem * user_data_fs;
 
 char filename[256] = {'\0'};
 
@@ -50,17 +48,10 @@ long getFileSize(FILE *fp) {
 
 void format() {
     MBRBlockDevice::partition(root, 1, 0x0B, 0, 5 * 1024 * 1024);
-    MBRBlockDevice::partition(root, 2, 0x0B, 5 * 1024 * 1024, 16 * 1024 * 1024);
 
     int err = sys_fs.reformat(&sys_bd);
     if (err) {
       printError("formatting sys partition");
-    }
-
-    user_data_fs = new FATFileSystem("user");
-    err = user_data_fs->reformat(&user_bd);
-    if (err) {
-      printError("formatting user partition");
     }
 }
 
