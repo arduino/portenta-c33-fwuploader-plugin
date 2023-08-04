@@ -30,22 +30,6 @@ void printError(String msg) {
     Serial.println("ERR:" + msg);
 }
 
-long getFileLen(FILE *file) {
-  fseek(file, 0, SEEK_END);
-  long len = ftell(file);
-  fseek(file, 0, SEEK_SET);
-  //Decrement len by 1 to remove the CRC from the count
-  return len;
-}
-
-long getFileSize(FILE *fp) {
-    fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    return size;
-}
-
 void format() {
     MBRBlockDevice::partition(root, 1, 0x0B, 0, 5 * 1024 * 1024);
 
@@ -99,6 +83,12 @@ void loop() {
     if (ret > 0 && name != "") {
       name = "/sys/" + name;
       fclose(f);
+
+      // Delete file having the same name
+      struct stat buffer;
+      if (stat(name.c_str(), &buffer) == 0) {
+          remove(name.c_str());
+      }
       ret = rename("/sys/temp.bin", name.c_str());
     }
   }
