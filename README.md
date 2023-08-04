@@ -19,7 +19,7 @@ Contributions are welcome!
 
 ## Development
 
-When running only the plugin without the fwuploader, the required tools are downloaded by the fwuploader. If you run only the plugin, you must provide them by hand.
+When running the plugin inside the fwuploader, the required tools are downloaded by the fwuploader. If you run only the plugin, you must provide them by hand.
 Therefore be sure to place the `esptool` and `dfu-util` binaries in the correct folders like the following:
 
 ```bash

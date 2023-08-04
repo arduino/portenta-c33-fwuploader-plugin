@@ -17,7 +17,6 @@
 package main
 
 import (
-	"bufio"
 	_ "embed"
 	"errors"
 	"fmt"
@@ -98,7 +97,8 @@ func (d *portentaC33Plugin) UploadFirmware(portAddress, fqbn string, firmwarePat
 	}
 	defer rebootFile.Remove()
 
-	if err := d.uploadSketch(&portAddress, feedback, rebootFile); err != nil {
+	portAddress, err = d.uploadSketch(portAddress, feedback, rebootFile)
+	if err != nil {
 		return err
 	}
 
@@ -139,7 +139,8 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 	}
 	defer certificateSketchFile.Remove()
 
-	if err := d.uploadSketch(&portAddress, feedback, certificateSketchFile); err != nil {
+	portAddress, err = d.uploadSketch(portAddress, feedback, certificateSketchFile)
+	if err != nil {
 		return err
 	}
 
@@ -219,7 +220,8 @@ func (d *portentaC33Plugin) GetFirmwareVersion(portAddress, fqbn string, feedbac
 	}
 	defer versionSketchFile.Remove()
 
-	if err := d.uploadSketch(&portAddress, feedback, versionSketchFile); err != nil {
+	portAddress, err = d.uploadSketch(portAddress, feedback, versionSketchFile)
+	if err != nil {
 		return nil, err
 	}
 
@@ -234,33 +236,42 @@ func (d *portentaC33Plugin) GetFirmwareVersion(portAddress, fqbn string, feedbac
 	}
 	defer port.Close()
 
-	var version string
-	scanner := bufio.NewScanner(port)
-	for scanner.Scan() {
-		version = scanner.Text()
-		break
+	// wait 1 second to allow the sketch to fill the buffer with the version string
+	time.Sleep(time.Second)
+
+	if err := port.SetReadTimeout(time.Second); err != nil {
+		return nil, err
+	}
+	buff := make([]byte, 30)
+	n, err := port.Read(buff)
+	if err != nil {
+		return nil, err
+	}
+	if n == 0 {
+		return nil, errors.New("couldn't read serial buffer")
 	}
 
+	version := strings.TrimSpace(string(buff[:n]))
 	return semver.ParseRelaxed(version), nil
 }
 
-func (d *portentaC33Plugin) uploadSketch(portAddress *string, feedback *helper.PluginFeedback, sketch *paths.Path) error {
+func (d *portentaC33Plugin) uploadSketch(portAddress string, feedback *helper.PluginFeedback, sketch *paths.Path) (string, error) {
 	slog.Info("upload_sketch")
 
 	// Will be used later to check if the OS changed the serial port.
 	allSerialPorts, err := serial.AllPorts()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	cmd, err := executils.NewProcess([]string{}, d.dfuUtilBin.String(), "--device", "0x2341:0x0068,:0x0368", "-D", sketch.String(), "-a0", "-Q")
 	if err != nil {
-		return err
+		return "", err
 	}
 	cmd.RedirectStderrTo(feedback.Err())
 	cmd.RedirectStdoutTo(feedback.Out())
 	if err := cmd.Run(); err != nil {
-		return err
+		return "", err
 	}
 
 	// When a board is successfully rebooted in esp32 mode, it might change the serial port.
@@ -268,11 +279,11 @@ func (d *portentaC33Plugin) uploadSketch(portAddress *string, feedback *helper.P
 	// we'll wait the 10 seconds timeout expiration.
 	newPort, changed, err := allSerialPorts.NewPort()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if changed {
-		*portAddress = newPort
+		return newPort, nil
 	}
 
-	return nil
+	return portAddress, nil
 }
