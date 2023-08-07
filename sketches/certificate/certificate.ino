@@ -24,26 +24,27 @@ BlockDevice* root = BlockDevice::get_default_instance();
 MBRBlockDevice sys_bd(root, 1);
 FATFileSystem sys_fs("sys");
 
-char filename[256] = {'\0'};
+char filename[256] = { '\0' };
 
 void printError(String msg) {
-    Serial.println("ERR:" + msg);
+  Serial.println("ERR:" + msg);
 }
 
 void format() {
-    MBRBlockDevice::partition(root, 1, 0x0B, 0, 5 * 1024 * 1024);
+  MBRBlockDevice::partition(root, 1, 0x0B, 0, 5 * 1024 * 1024);
 
-    int err = sys_fs.reformat(&sys_bd);
-    if (err) {
-      printError("formatting sys partition");
-    }
+  int err = sys_fs.reformat(&sys_bd);
+  if (err) {
+    printError("formatting sys partition");
+  }
 }
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial)
+    ;
 
-  int err =  sys_fs.mount(&sys_bd);
+  int err = sys_fs.mount(&sys_bd);
   if (err) {
     format();
   }
@@ -53,9 +54,9 @@ void setup() {
   FILE* fp = fopen("/sys/cacert.pem", "wb");
 
   while (byte_count < cacert_pem_len) {
-    if(byte_count + chunk_size > cacert_pem_len)
+    if (byte_count + chunk_size > cacert_pem_len)
       chunk_size = cacert_pem_len - byte_count;
-    int ret = fwrite(&cacert_pem[byte_count], chunk_size, 1 ,fp);
+    int ret = fwrite(&cacert_pem[byte_count], chunk_size, 1, fp);
     if (ret != 1) {
       printError("writing certificates");
       break;
@@ -87,7 +88,7 @@ void loop() {
       // Delete file having the same name
       struct stat buffer;
       if (stat(name.c_str(), &buffer) == 0) {
-          remove(name.c_str());
+        remove(name.c_str());
       }
       ret = rename("/sys/temp.bin", name.c_str());
     }

@@ -24,15 +24,15 @@ int dtr = -1;
 
 #warning Compiling for Portenta H33
 #ifndef SerialNina
-#define SerialNina      Serial5
+#define SerialNina Serial5
 #endif
 
 #ifndef NINA_GPIO0
-#define NINA_GPIO0      (100)
+#define NINA_GPIO0 (100)
 #endif
 
 #ifndef NINA_RESETN
-#define NINA_RESETN     (101)
+#define NINA_RESETN (101)
 #endif
 
 #else
@@ -40,15 +40,15 @@ int dtr = -1;
 #warning Compiling for Santiago
 
 #ifndef SerialNina
-#define SerialNina      Serial2
+#define SerialNina Serial2
 #endif
 
 #ifndef NINA_GPIO0
-#define NINA_GPIO0      (28)
+#define NINA_GPIO0 (28)
 #endif
 
 #ifndef NINA_RESETN
-#define NINA_RESETN     (29)
+#define NINA_RESETN (29)
 #endif
 
 #endif
@@ -56,7 +56,8 @@ int dtr = -1;
 void setup() {
   Serial.begin(baud, SERIAL_8N1);
   SerialNina.begin(baud);
-  while (!Serial);
+  while (!Serial)
+    ;
 
   pinMode(NINA_GPIO0, OUTPUT);
   pinMode(NINA_RESETN, OUTPUT);
