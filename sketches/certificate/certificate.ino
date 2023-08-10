@@ -39,16 +39,7 @@ void format() {
   }
 }
 
-void setup() {
-  Serial.begin(115200);
-  while (!Serial)
-    ;
-
-  int err = sys_fs.mount(&sys_bd);
-  if (err) {
-    format();
-  }
-
+void writeDefaultCert() {
   int chunk_size = 128;
   int byte_count = 0;
   FILE* fp = fopen("/sys/cacert.pem", "wb");
@@ -64,6 +55,21 @@ void setup() {
     byte_count += chunk_size;
   }
   fclose(fp);
+}
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial)
+    ;
+
+  int err = sys_fs.mount(&sys_bd);
+  if (err) {
+    format();
+  }
+  struct stat buffer;
+  if (stat(String("/sys/cacert.pem").c_str(), &buffer) != 0) {
+    writeDefaultCert();
+  }
 }
 
 void loop() {
