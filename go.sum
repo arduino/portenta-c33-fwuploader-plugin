@@ -4,6 +4,8 @@ github.com/arduino/fwuploader-plugin-helper v1.0.0 h1:TZgsUmus48NfhMqf5oGQ7R0LI/
 github.com/arduino/fwuploader-plugin-helper v1.0.0/go.mod h1:nn5yK4HZafLHXixk5ty0Q+Lvo4PF/PI7gRJCaHWOD+E=
 github.com/arduino/go-paths-helper v1.9.1 h1:qpK+zMMjsklSBQa09/P5FZ/uf3LyjVmJK3DLeyiGjCc=
 github.com/arduino/go-paths-helper v1.9.1/go.mod h1:V82BWgAAp4IbmlybxQdk9Bpkz8M4Qyx+RAFKaG9NuvU=
+github.com/arduino/go-xmodem v0.1.0 h1:JfqZ1tjCyg+v0cRHdwjf9tvQTlbteV6KLHcWBeVt73E=
+github.com/arduino/go-xmodem v0.1.0/go.mod h1:XyoTE89X86iB0M9LWlzwmSInL05+KIk2AVdLLhR04Kg=
 github.com/arduino/uno-r4-wifi-fwuploader-plugin v0.0.0-20230719120105-af756953af1e h1:bDq9xu7niNATPGPemj0sLsjKjTHvZWckYJSypaL9Wyk=
 github.com/arduino/uno-r4-wifi-fwuploader-plugin v0.0.0-20230719120105-af756953af1e/go.mod h1:iJIM9yYttUrCYiMSO2ut60s4Xomg2PL58IWej7w3jvI=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
@@ -11,7 +13,6 @@ github.com/creack/goselect v0.1.2 h1:2DNy14+JPjRBgPzAd1thbQp4BSIihxcBf0IXhQXDRa0
 github.com/creack/goselect v0.1.2/go.mod h1:a/NhLweNvqIYMuxcMOuWY516Cimucms3DglDzQP3hKY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/leonelquinteros/gotext v1.5.2 h1:T2y6ebHli+rMBCjcJlHTXyUrgXqsKBhl/ormgvt7lPo=
@@ -28,7 +29,6 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.bug.st/relaxed-semver v0.11.0 h1:ngzpUlBEZ5F9hJnMZP55LIFbgX3bCztBBufMhJViAsY=
 go.bug.st/relaxed-semver v0.11.0/go.mod h1:rqPEm+790OTQlAdfSJSHWwpKOg3A8UyvAWMZxYkQivc=
@@ -49,8 +49,8 @@ golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.10.0 h1:SqMFp9UcQJZa+pmYuAKjd9xq1f0j5rLcDIk0mj4qAsA=
-golang.org/x/sys v0.10.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.11.0 h1:eG7RXZHdqOJ1i+0lgLgCpSXAp6M3LYlAo6osgSi0xOM=
+golang.org/x/sys v0.11.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

@@ -27,7 +27,7 @@ import (
 	"github.com/arduino/arduino-cli/executils"
 	helper "github.com/arduino/fwuploader-plugin-helper"
 	"github.com/arduino/go-paths-helper"
-	"github.com/arduino/portenta-c33-fwuploader-plugin/ymodem"
+	"github.com/arduino/go-xmodem/ymodem"
 	"github.com/arduino/uno-r4-wifi-fwuploader-plugin/serial"
 	semver "go.bug.st/relaxed-semver"
 	serialx "go.bug.st/serial"
