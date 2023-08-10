@@ -149,7 +149,7 @@ func (d *portentaC33Plugin) UploadCertificate(portAddress, fqbn string, certific
 	if err != nil {
 		return err
 	}
-	if err := connection.SetReadTimeout(100 * time.Second); err != nil {
+	if err := connection.SetReadTimeout(20 * time.Second); err != nil {
 		return err
 	}
 
