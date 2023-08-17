@@ -43,12 +43,12 @@ venv
 __debug_bin
 
 # build sketches files
-sketches/commands/build/**/*.hex
-sketches/commands/build/**/*.elf
-sketches/commands/build/**/*.map
-sketches/commands/build/**/*.uf2
-sketches/commands/build/**/*.eep
-sketches/commands/build/**/*bootloader.bin
+sketches/**/build/**/*.hex
+sketches/**/build/**/*.elf
+sketches/**/build/**/*.map
+sketches/**/build/**/*.uf2
+sketches/**/build/**/*.eep
+sketches/**/build/**/*bootloader.bin
 
 # compiled binary in root folder
 portenta-c33-fwuploader-plugin

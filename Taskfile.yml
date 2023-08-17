@@ -147,6 +147,16 @@ tasks:
     cmds:
       - go vet {{default .DEFAULT_GO_PACKAGES .GO_PACKAGES}}
 
+  sketch:compile:
+    desc: Compile all the sketches
+    dir: "./sketches/"
+    cmds:
+      - |
+        for folder in certificate reboot version
+        do
+            arduino-cli compile -e --profile portenta_c33 $folder
+        done
+
   # Source: https://github.com/arduino/tooling-project-assets/blob/main/workflow-templates/assets/check-markdown-task/Taskfile.yml
   markdown:check-links:
     desc: Check for broken links
